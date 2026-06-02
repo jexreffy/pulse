@@ -82,13 +82,15 @@ export class PipelineStack extends cdk.Stack {
     // All Lambdas share the same asset (whole api/ dir) so shared/ is always present
     const apiCode = lambda.Code.fromAsset('../api');
 
-    // Fetch Lambda - pulls top HackerNews stories and saves to S3
+    // Fetch Lambda - no VPC, needs public internet to reach HackerNews API
+    // S3 and SQS are reachable via their public endpoints without VPC
     const fetchFunction = new lambda.Function(this, 'FetchFunction', {
-      ...sharedProps,
+      runtime: RUNTIME,
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(60),
       functionName: 'pulse-fetch',
       code: apiCode,
       handler: 'fetch/handler.handler',
-      timeout: cdk.Duration.seconds(60),
       logGroup: fetchLogGroup,
       environment: {
         ...sharedEnv,
