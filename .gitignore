@@ -1,0 +1,14 @@
+node_modules/
+cdk/cdk.out/
+cdk/dist/
+frontend/dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.egg-info/
+.env
+.env.local
+cdk-outputs.json
+.coverage
+htmlcov/
