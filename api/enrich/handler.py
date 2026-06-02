@@ -7,6 +7,7 @@ import json
 import os
 import time
 from datetime import datetime, timezone
+from decimal import Decimal
 
 import boto3
 
@@ -31,8 +32,11 @@ def enrich_article(run_id: str, article: dict, date: str, hour: str) -> None:
 
     # Call Comprehend — entities
     entities_resp = comprehend.detect_entities(Text=title, LanguageCode="en")
+    def d(f: float) -> Decimal:
+        return Decimal(str(round(f, 4)))
+
     entities = [
-        {"text": e["Text"], "type": e["Type"], "score": round(e["Score"], 3)}
+        {"text": e["Text"], "type": e["Type"], "score": d(e["Score"])}
         for e in entities_resp["Entities"]
         if e["Score"] > 0.8
     ]
@@ -47,10 +51,10 @@ def enrich_article(run_id: str, article: dict, date: str, hour: str) -> None:
             "url": article.get("url", ""),
             "sentiment": sentiment,
             "sentiment_scores": {
-                "positive": round(scores["Positive"], 4),
-                "negative": round(scores["Negative"], 4),
-                "neutral": round(scores["Neutral"], 4),
-                "mixed": round(scores["Mixed"], 4),
+                "positive": d(scores["Positive"]),
+                "negative": d(scores["Negative"]),
+                "neutral": d(scores["Neutral"]),
+                "mixed": d(scores["Mixed"]),
             },
             "entities": entities,
             "date": date,
