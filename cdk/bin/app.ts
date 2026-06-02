@@ -30,10 +30,10 @@ const pipeline = new PipelineStack(app, 'PulsePipeline', {
 
 new SchedulerStack(app, 'PulseScheduler', {
   env,
-  fetchFunction: pipeline.fetchFunction,
+  stateMachine: pipeline.stateMachine,
 });
 
-new ApiStack(app, 'PulseApi', {
+const api = new ApiStack(app, 'PulseApi', {
   env,
   vpc: networking.vpc,
   lambdaSg: networking.lambdaSg,
@@ -43,5 +43,5 @@ new ApiStack(app, 'PulseApi', {
 
 new CdnStack(app, 'PulseCdn', {
   env,
-  apiUrl: pipeline.apiUrl,
+  apiUrl: api.apiUrl,
 });

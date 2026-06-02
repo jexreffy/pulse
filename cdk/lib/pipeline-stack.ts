@@ -20,7 +20,6 @@ interface PipelineStackProps extends cdk.StackProps {
 }
 
 export class PipelineStack extends cdk.Stack {
-  public readonly fetchFunction: lambda.Function;
   public readonly stateMachine: sfn.StateMachine;
   public readonly apiUrl: string;
 
@@ -81,7 +80,7 @@ export class PipelineStack extends cdk.Stack {
     };
 
     // Fetch Lambda - pulls top HackerNews stories and saves to S3
-    this.fetchFunction = new lambda.Function(this, 'FetchFunction', {
+    const fetchFunction = new lambda.Function(this, 'FetchFunction', {
       ...sharedProps,
       functionName: 'pulse-fetch',
       code: lambda.Code.fromAsset('../api/fetch'),
@@ -92,8 +91,8 @@ export class PipelineStack extends cdk.Stack {
         ENRICH_QUEUE_URL: enrichQueue.queueUrl,
       },
     });
-    rawBucket.grantWrite(this.fetchFunction);
-    enrichQueue.grantSendMessages(this.fetchFunction);
+    rawBucket.grantWrite(fetchFunction);
+    enrichQueue.grantSendMessages(fetchFunction);
 
     // Extract Lambda - parses raw S3 JSON, publishes article messages to SQS
     const extractFunction = new lambda.Function(this, 'ExtractFunction', {
@@ -141,7 +140,7 @@ export class PipelineStack extends cdk.Stack {
 
     // Step Functions state machine
     const fetchTask = new tasks.LambdaInvoke(this, 'FetchTask', {
-      lambdaFunction: this.fetchFunction,
+      lambdaFunction: fetchFunction,
       outputPath: '$.Payload',
     });
 
@@ -170,10 +169,6 @@ export class PipelineStack extends cdk.Stack {
       stateMachineType: sfn.StateMachineType.STANDARD,
     });
 
-    // Allow fetch to start executions (set from EventBridge directly)
-    this.stateMachine.grantStartExecution(this.fetchFunction);
-
-    // Expose for SchedulerStack
     this.apiUrl = '';
 
     // Outputs
