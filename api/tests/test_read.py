@@ -1,14 +1,14 @@
 """Tests for the Read Lambda handler."""
+
 import json
 import sys
 import os
 from decimal import Decimal
-import pytest
 from moto import mock_aws
 import boto3
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'shared'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "shared"))
 
 
 def _create_tables(ddb):
@@ -46,19 +46,23 @@ def test_get_runs_returns_run_entries():
     results_table, _ = _create_tables(ddb)
 
     from datetime import datetime, timezone
+
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    results_table.put_item(Item={
-        "date": today,
-        "sk": "run#abc123",
-        "run_id": "abc123",
-        "hour": "10",
-        "article_count": 25,
-        "status": "COMPLETED",
-        "completed_at": "2024-01-01T10:30:00+00:00",
-    })
+    results_table.put_item(
+        Item={
+            "date": today,
+            "sk": "run#abc123",
+            "run_id": "abc123",
+            "hour": "10",
+            "article_count": 25,
+            "status": "COMPLETED",
+            "completed_at": "2024-01-01T10:30:00+00:00",
+        }
+    )
 
     import importlib
     import read.handler as read_mod
+
     importlib.reload(read_mod)
 
     resp = read_mod.handler({"rawPath": "/runs", "pathParameters": {}}, None)
@@ -75,22 +79,26 @@ def test_get_results_returns_hourly_data():
     results_table, _ = _create_tables(ddb)
 
     from datetime import datetime, timezone
+
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    results_table.put_item(Item={
-        "date": today,
-        "sk": "hour#12",
-        "run_id": "xyz",
-        "article_count": 20,
-        "positive_pct": Decimal("60.0"),
-        "negative_pct": Decimal("20.0"),
-        "neutral_pct": Decimal("20.0"),
-        "mixed_pct": Decimal("0.0"),
-        "top_entities": [],
-        "aggregated_at": "2024-01-01T12:30:00+00:00",
-    })
+    results_table.put_item(
+        Item={
+            "date": today,
+            "sk": "hour#12",
+            "run_id": "xyz",
+            "article_count": 20,
+            "positive_pct": Decimal("60.0"),
+            "negative_pct": Decimal("20.0"),
+            "neutral_pct": Decimal("20.0"),
+            "mixed_pct": Decimal("0.0"),
+            "top_entities": [],
+            "aggregated_at": "2024-01-01T12:30:00+00:00",
+        }
+    )
 
     import importlib
     import read.handler as read_mod
+
     importlib.reload(read_mod)
 
     resp = read_mod.handler({"rawPath": "/results", "pathParameters": {}}, None)
@@ -108,6 +116,7 @@ def test_unknown_path_returns_404():
 
     import importlib
     import read.handler as read_mod
+
     importlib.reload(read_mod)
 
     resp = read_mod.handler({"rawPath": "/unknown", "pathParameters": {}}, None)

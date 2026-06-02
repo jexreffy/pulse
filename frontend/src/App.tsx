@@ -26,8 +26,8 @@ export default function App() {
     try {
       const a = await getArticles(runId);
       setArticles(a);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
     }
   };
 

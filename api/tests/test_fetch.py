@@ -1,25 +1,32 @@
 """Tests for the Fetch Lambda handler."""
+
 import json
 import sys
 import os
-from unittest.mock import patch, MagicMock
-import pytest
+from unittest.mock import patch
 from moto import mock_aws
 import boto3
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'shared'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "shared"))
 
 
 @mock_aws
 def test_fetch_saves_raw_json_to_s3():
     """Fetch handler should save raw article JSON to S3."""
-    import boto3
     s3 = boto3.client("s3", region_name="us-east-1")
     s3.create_bucket(Bucket="pulse-raw-test")
 
     mock_top_stories = [1, 2, 3]
-    mock_item = {"id": 1, "type": "story", "title": "Test headline", "url": "https://example.com", "score": 100, "by": "user", "time": 1000000}
+    mock_item = {
+        "id": 1,
+        "type": "story",
+        "title": "Test headline",
+        "url": "https://example.com",
+        "score": 100,
+        "by": "user",
+        "time": 1000000,
+    }
 
     def mock_fetch_json(url):
         if "topstories" in url:
@@ -28,6 +35,7 @@ def test_fetch_saves_raw_json_to_s3():
 
     with patch("fetch.handler.fetch_json", side_effect=mock_fetch_json):
         from fetch.handler import handler
+
         result = handler({}, None)
 
     assert result["article_count"] == 3
@@ -44,13 +52,19 @@ def test_fetch_saves_raw_json_to_s3():
 @mock_aws
 def test_fetch_skips_non_story_items():
     """Fetch handler should skip items without title or not of type story."""
-    import boto3
     s3 = boto3.client("s3", region_name="us-east-1")
     s3.create_bucket(Bucket="pulse-raw-test")
 
     mock_top_stories = [1, 2]
     items = {
-        1: {"id": 1, "type": "story", "title": "Valid story", "score": 10, "by": "u", "time": 1},
+        1: {
+            "id": 1,
+            "type": "story",
+            "title": "Valid story",
+            "score": 10,
+            "by": "u",
+            "time": 1,
+        },
         2: {"id": 2, "type": "comment", "text": "No title"},  # should be skipped
     }
 
@@ -62,6 +76,7 @@ def test_fetch_skips_non_story_items():
 
     with patch("fetch.handler.fetch_json", side_effect=mock_fetch_json):
         from fetch.handler import handler
+
         result = handler({}, None)
 
     assert result["article_count"] == 1

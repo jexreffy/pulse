@@ -1,13 +1,13 @@
 """Tests for the Extract Lambda handler."""
+
 import json
 import sys
 import os
-import pytest
 from moto import mock_aws
 import boto3
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'shared'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "shared"))
 
 
 @mock_aws
@@ -22,12 +22,29 @@ def test_extract_publishes_sqs_messages():
         "date": "2024-01-01",
         "hour": "12",
         "articles": [
-            {"id": "1", "title": "Headline A", "url": "", "score": 10, "by": "u", "time": 1},
-            {"id": "2", "title": "Headline B", "url": "", "score": 5, "by": "u", "time": 2},
+            {
+                "id": "1",
+                "title": "Headline A",
+                "url": "",
+                "score": 10,
+                "by": "u",
+                "time": 1,
+            },
+            {
+                "id": "2",
+                "title": "Headline B",
+                "url": "",
+                "score": 5,
+                "by": "u",
+                "time": 2,
+            },
         ],
     }
-    s3.put_object(Bucket="pulse-raw-test", Key="raw/2024-01-01/12/test-run-1.json",
-                  Body=json.dumps(raw_payload))
+    s3.put_object(
+        Bucket="pulse-raw-test",
+        Key="raw/2024-01-01/12/test-run-1.json",
+        Body=json.dumps(raw_payload),
+    )
 
     # Setup SQS
     sqs = boto3.client("sqs", region_name="us-east-1")
@@ -36,6 +53,7 @@ def test_extract_publishes_sqs_messages():
 
     import importlib
     import extract.handler as extract_mod
+
     importlib.reload(extract_mod)
 
     event = {

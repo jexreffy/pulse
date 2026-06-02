@@ -2,6 +2,7 @@
 Enrich Lambda — triggered by SQS event source mapping.
 Calls Amazon Comprehend for sentiment + entities, writes result to DynamoDB.
 """
+
 import json
 import os
 import time
@@ -10,7 +11,8 @@ from datetime import datetime, timezone
 import boto3
 
 import sys
-sys.path.insert(0, '/opt/python')
+
+sys.path.insert(0, "/opt/python")
 
 try:
     from shared import logger
@@ -44,24 +46,26 @@ def enrich_article(run_id: str, article: dict, date: str, hour: str) -> None:
 
     ttl = int(time.time()) + SEVEN_DAYS
 
-    table.put_item(Item={
-        "run_id": run_id,
-        "article_id": article_id,
-        "title": title,
-        "url": article.get("url", ""),
-        "sentiment": sentiment,
-        "sentiment_scores": {
-            "positive": round(scores["Positive"], 4),
-            "negative": round(scores["Negative"], 4),
-            "neutral": round(scores["Neutral"], 4),
-            "mixed": round(scores["Mixed"], 4),
-        },
-        "entities": entities,
-        "date": date,
-        "hour": hour,
-        "fetched_at": datetime.now(timezone.utc).isoformat(),
-        "ttl": ttl,
-    })
+    table.put_item(
+        Item={
+            "run_id": run_id,
+            "article_id": article_id,
+            "title": title,
+            "url": article.get("url", ""),
+            "sentiment": sentiment,
+            "sentiment_scores": {
+                "positive": round(scores["Positive"], 4),
+                "negative": round(scores["Negative"], 4),
+                "neutral": round(scores["Neutral"], 4),
+                "mixed": round(scores["Mixed"], 4),
+            },
+            "entities": entities,
+            "date": date,
+            "hour": hour,
+            "fetched_at": datetime.now(timezone.utc).isoformat(),
+            "ttl": ttl,
+        }
+    )
 
 
 def handler(event: dict, context) -> dict:
@@ -82,7 +86,11 @@ def handler(event: dict, context) -> dict:
 
         except Exception as e:
             failed += 1
-            logger.error("Failed to enrich article", error=str(e), record=record.get("body", "")[:200])
+            logger.error(
+                "Failed to enrich article",
+                error=str(e),
+                record=record.get("body", "")[:200],
+            )
             raise  # Re-raise so SQS retries / sends to DLQ
 
     logger.info("Enrich batch complete", processed=processed, failed=failed)

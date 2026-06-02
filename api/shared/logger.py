@@ -1,4 +1,5 @@
 """Structured JSON logger — mirrors mossy-wave _logger.ts pattern."""
+
 import json
 import sys
 from datetime import datetime, timezone

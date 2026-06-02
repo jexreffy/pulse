@@ -6,16 +6,18 @@ Routes:
   GET /articles/{run_id} → enriched articles for a run
   GET /runs             → recent pipeline run log entries
 """
+
 import json
 import os
 from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 
 import boto3
-from boto3.dynamodb.conditions import Key, Attr
+from boto3.dynamodb.conditions import Key
 
 import sys
-sys.path.insert(0, '/opt/python')
+
+sys.path.insert(0, "/opt/python")
 
 try:
     from shared import logger
@@ -58,9 +60,12 @@ def handler(event: dict, context) -> dict:
             # Last 7 days of hourly summaries
             items = []
             for i in range(7):
-                date = (datetime.now(timezone.utc) - timedelta(days=i)).strftime("%Y-%m-%d")
+                date = (datetime.now(timezone.utc) - timedelta(days=i)).strftime(
+                    "%Y-%m-%d"
+                )
                 resp = results_table.query(
-                    KeyConditionExpression=Key("date").eq(date) & Key("sk").begins_with("hour#")
+                    KeyConditionExpression=Key("date").eq(date)
+                    & Key("sk").begins_with("hour#")
                 )
                 items.extend(resp.get("Items", []))
             return respond(200, {"results": items})
@@ -68,24 +73,26 @@ def handler(event: dict, context) -> dict:
         elif path.startswith("/results/"):
             date = params.get("date") or path.split("/results/")[1]
             resp = results_table.query(
-                KeyConditionExpression=Key("date").eq(date) & Key("sk").begins_with("hour#")
+                KeyConditionExpression=Key("date").eq(date)
+                & Key("sk").begins_with("hour#")
             )
             return respond(200, {"date": date, "hours": resp.get("Items", [])})
 
         elif path.startswith("/articles/"):
             run_id = params.get("run_id") or path.split("/articles/")[1]
-            resp = articles_table.query(
-                KeyConditionExpression=Key("run_id").eq(run_id)
-            )
+            resp = articles_table.query(KeyConditionExpression=Key("run_id").eq(run_id))
             return respond(200, {"run_id": run_id, "articles": resp.get("Items", [])})
 
         elif path == "/runs":
             # Last 3 days of run entries
             items = []
             for i in range(3):
-                date = (datetime.now(timezone.utc) - timedelta(days=i)).strftime("%Y-%m-%d")
+                date = (datetime.now(timezone.utc) - timedelta(days=i)).strftime(
+                    "%Y-%m-%d"
+                )
                 resp = results_table.query(
-                    KeyConditionExpression=Key("date").eq(date) & Key("sk").begins_with("run#")
+                    KeyConditionExpression=Key("date").eq(date)
+                    & Key("sk").begins_with("run#")
                 )
                 items.extend(resp.get("Items", []))
             items.sort(key=lambda x: x.get("completed_at", ""), reverse=True)

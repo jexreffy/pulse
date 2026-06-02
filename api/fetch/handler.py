@@ -2,6 +2,7 @@
 Fetch Lambda — pulls top 30 HackerNews stories and saves raw JSON to S3.
 Triggered by EventBridge Scheduler (hourly) or manually.
 """
+
 import json
 import os
 import uuid
@@ -11,7 +12,8 @@ import boto3
 import urllib.request
 
 import sys
-sys.path.insert(0, '/opt/python')  # Lambda Layer path
+
+sys.path.insert(0, "/opt/python")  # Lambda Layer path
 
 try:
     from shared import logger
@@ -42,7 +44,9 @@ def handler(event: dict, context) -> dict:
     logger.info("Fetch started", run_id=run_id, date=date_str, hour=hour_str)
 
     try:
-        top_ids: list[int] = fetch_json(f"{HN_BASE}/topstories.json")[:TOP_STORIES_LIMIT]
+        top_ids: list[int] = fetch_json(f"{HN_BASE}/topstories.json")[
+            :TOP_STORIES_LIMIT
+        ]
     except Exception as e:
         logger.error("Failed to fetch top stories", error=str(e))
         raise
@@ -52,14 +56,16 @@ def handler(event: dict, context) -> dict:
         try:
             item = fetch_json(f"{HN_BASE}/item/{story_id}.json")
             if item and item.get("type") == "story" and item.get("title"):
-                articles.append({
-                    "id": str(story_id),
-                    "title": item.get("title", ""),
-                    "url": item.get("url", ""),
-                    "score": item.get("score", 0),
-                    "by": item.get("by", ""),
-                    "time": item.get("time", 0),
-                })
+                articles.append(
+                    {
+                        "id": str(story_id),
+                        "title": item.get("title", ""),
+                        "url": item.get("url", ""),
+                        "score": item.get("score", 0),
+                        "by": item.get("by", ""),
+                        "time": item.get("time", 0),
+                    }
+                )
         except Exception as e:
             logger.warn("Skipping story", story_id=story_id, error=str(e))
 

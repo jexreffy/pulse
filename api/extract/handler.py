@@ -2,13 +2,15 @@
 Extract Lambda — reads raw S3 JSON, publishes one SQS message per article.
 Called by Step Functions after Fetch completes.
 """
+
 import json
 import os
 
 import boto3
 
 import sys
-sys.path.insert(0, '/opt/python')
+
+sys.path.insert(0, "/opt/python")
 
 try:
     from shared import logger

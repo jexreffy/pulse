@@ -34,28 +34,23 @@ jobs:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Install Python deps & run tests
+      - name: Install Python deps, lint & test
         working-directory: api
         run: |
           pip install -r requirements-dev.txt
-          pytest --tb=short -q
-
-      - name: Lint Python
-        working-directory: api
-        run: |
-          pip install ruff black
           black --check .
           ruff check .
+          pytest --tb=short -q
 
       - name: Install & build frontend
         working-directory: frontend
-        run: npm ci && npm run build
+        run: npm ci && npm run lint && npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       - name: Install & build CDK
         working-directory: cdk
-        run: npm ci && npm run build
+        run: npm ci && npm run lint && npm run build
 
       - name: CDK deploy
         working-directory: cdk

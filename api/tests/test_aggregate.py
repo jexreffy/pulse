@@ -1,13 +1,13 @@
 """Tests for the Aggregate Lambda handler."""
+
 import sys
 import os
-import pytest
 from decimal import Decimal
 from moto import mock_aws
 import boto3
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'shared'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "shared"))
 
 
 def _create_tables(ddb):
@@ -47,9 +47,19 @@ def test_aggregate_computes_sentiment_percentages():
     # Seed articles
     run_id = "run-agg-test"
     articles_data = [
-        {"run_id": run_id, "article_id": "1", "sentiment": "POSITIVE", "entities": [{"text": "AWS", "type": "ORG", "score": Decimal("0.99")}]},
+        {
+            "run_id": run_id,
+            "article_id": "1",
+            "sentiment": "POSITIVE",
+            "entities": [{"text": "AWS", "type": "ORG", "score": Decimal("0.99")}],
+        },
         {"run_id": run_id, "article_id": "2", "sentiment": "POSITIVE", "entities": []},
-        {"run_id": run_id, "article_id": "3", "sentiment": "NEGATIVE", "entities": [{"text": "AWS", "type": "ORG", "score": Decimal("0.95")}]},
+        {
+            "run_id": run_id,
+            "article_id": "3",
+            "sentiment": "NEGATIVE",
+            "entities": [{"text": "AWS", "type": "ORG", "score": Decimal("0.95")}],
+        },
         {"run_id": run_id, "article_id": "4", "sentiment": "NEUTRAL", "entities": []},
     ]
     for a in articles_data:
@@ -57,9 +67,12 @@ def test_aggregate_computes_sentiment_percentages():
 
     import importlib
     import aggregate.handler as agg_mod
+
     importlib.reload(agg_mod)
 
-    result = agg_mod.handler({"run_id": run_id, "date": "2024-01-01", "hour": "08"}, None)
+    result = agg_mod.handler(
+        {"run_id": run_id, "date": "2024-01-01", "hour": "08"}, None
+    )
 
     assert result["article_count"] == 4
     assert result["status"] == "COMPLETED"
@@ -80,7 +93,10 @@ def test_aggregate_handles_empty_run():
 
     import importlib
     import aggregate.handler as agg_mod
+
     importlib.reload(agg_mod)
 
-    result = agg_mod.handler({"run_id": "empty-run", "date": "2024-01-01", "hour": "09"}, None)
+    result = agg_mod.handler(
+        {"run_id": "empty-run", "date": "2024-01-01", "hour": "09"}, None
+    )
     assert result["article_count"] == 0
