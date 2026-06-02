@@ -12,14 +12,7 @@ from decimal import Decimal
 import boto3
 from boto3.dynamodb.conditions import Key
 
-import sys
-
-sys.path.insert(0, "/opt/python")
-
-try:
-    from shared import logger
-except ImportError:
-    import logger  # type: ignore
+from shared import logger
 
 RESULTS_TABLE = os.environ["RESULTS_TABLE"]
 ARTICLES_TABLE = os.environ["ARTICLES_TABLE"]

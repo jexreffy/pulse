@@ -11,14 +11,7 @@ from datetime import datetime, timezone
 import boto3
 import urllib.request
 
-import sys
-
-sys.path.insert(0, "/opt/python")  # Lambda Layer path
-
-try:
-    from shared import logger
-except ImportError:
-    import logger  # type: ignore
+from shared import logger
 
 RAW_BUCKET = os.environ["RAW_BUCKET"]
 ENRICH_QUEUE_URL = os.environ.get("ENRICH_QUEUE_URL", "")

@@ -10,14 +10,7 @@ from datetime import datetime, timezone
 
 import boto3
 
-import sys
-
-sys.path.insert(0, "/opt/python")
-
-try:
-    from shared import logger
-except ImportError:
-    import logger  # type: ignore
+from shared import logger
 
 ARTICLES_TABLE = os.environ["ARTICLES_TABLE"]
 SEVEN_DAYS = 7 * 24 * 60 * 60

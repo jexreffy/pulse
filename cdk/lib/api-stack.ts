@@ -31,8 +31,8 @@ export class ApiStack extends cdk.Stack {
     const readFunction = new lambda.Function(this, 'ReadFunction', {
       functionName: 'pulse-read',
       runtime: lambda.Runtime.PYTHON_3_12,
-      handler: 'handler.handler',
-      code: lambda.Code.fromAsset('../api/read'),
+      handler: 'read/handler.handler',
+      code: lambda.Code.fromAsset('../api'),
       vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
       securityGroups: [lambdaSg],

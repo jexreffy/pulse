@@ -76,14 +76,18 @@ export class PipelineStack extends cdk.Stack {
       securityGroups: [lambdaSg],
       memorySize: 256,
       timeout: cdk.Duration.seconds(30),
-      handler: 'handler.handler',
+      handler: 'handler.handler', // overridden per-function below
     };
+
+    // All Lambdas share the same asset (whole api/ dir) so shared/ is always present
+    const apiCode = lambda.Code.fromAsset('../api');
 
     // Fetch Lambda - pulls top HackerNews stories and saves to S3
     const fetchFunction = new lambda.Function(this, 'FetchFunction', {
       ...sharedProps,
       functionName: 'pulse-fetch',
-      code: lambda.Code.fromAsset('../api/fetch'),
+      code: apiCode,
+      handler: 'fetch/handler.handler',
       timeout: cdk.Duration.seconds(60),
       logGroup: fetchLogGroup,
       environment: {
@@ -98,7 +102,8 @@ export class PipelineStack extends cdk.Stack {
     const extractFunction = new lambda.Function(this, 'ExtractFunction', {
       ...sharedProps,
       functionName: 'pulse-extract',
-      code: lambda.Code.fromAsset('../api/extract'),
+      code: apiCode,
+      handler: 'extract/handler.handler',
       logGroup: extractLogGroup,
       environment: {
         ...sharedEnv,
@@ -112,7 +117,8 @@ export class PipelineStack extends cdk.Stack {
     const enrichFunction = new lambda.Function(this, 'EnrichFunction', {
       ...sharedProps,
       functionName: 'pulse-enrich',
-      code: lambda.Code.fromAsset('../api/enrich'),
+      code: apiCode,
+      handler: 'enrich/handler.handler',
       timeout: cdk.Duration.seconds(60),
       logGroup: enrichLogGroup,
       environment: sharedEnv,
@@ -131,7 +137,8 @@ export class PipelineStack extends cdk.Stack {
     const aggregateFunction = new lambda.Function(this, 'AggregateFunction', {
       ...sharedProps,
       functionName: 'pulse-aggregate',
-      code: lambda.Code.fromAsset('../api/aggregate'),
+      code: apiCode,
+      handler: 'aggregate/handler.handler',
       logGroup: aggregateLogGroup,
       environment: sharedEnv,
     });

@@ -8,14 +8,7 @@ import os
 
 import boto3
 
-import sys
-
-sys.path.insert(0, "/opt/python")
-
-try:
-    from shared import logger
-except ImportError:
-    import logger  # type: ignore
+from shared import logger
 
 RAW_BUCKET = os.environ["RAW_BUCKET"]
 ENRICH_QUEUE_URL = os.environ["ENRICH_QUEUE_URL"]
