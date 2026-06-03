@@ -27,7 +27,7 @@ export function SentimentChart({ results }: Props) {
         <CartesianGrid strokeDasharray="3 3" stroke="#2a3a2a" />
         <XAxis dataKey="label" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
         <YAxis unit="%" tick={{ fontSize: 11 }} />
-        <Tooltip formatter={(v: number) => `${v.toFixed(1)}%`} />
+        <Tooltip formatter={(v) => (typeof v === 'number' ? `${v.toFixed(1)}%` : v)} />
         <Legend />
         <Line type="monotone" dataKey="positive" stroke="#4ade80" dot={false} strokeWidth={2} />
         <Line type="monotone" dataKey="negative" stroke="#f87171" dot={false} strokeWidth={2} />
