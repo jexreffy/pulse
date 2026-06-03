@@ -32,6 +32,7 @@ def enrich_article(run_id: str, article: dict, date: str, hour: str) -> None:
 
     # Call Comprehend — entities
     entities_resp = comprehend.detect_entities(Text=title, LanguageCode="en")
+
     def d(f: float) -> Decimal:
         return Decimal(str(round(f, 4)))
 
