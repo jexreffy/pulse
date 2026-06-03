@@ -54,18 +54,19 @@ jobs:
 
       - name: CDK deploy
         working-directory: cdk
-        run: npx cdk deploy --all --require-approval never --outputs-file ../cdk-outputs.json
+        # PulseCdn excluded — CloudFront blocked on new AWS accounts
+        run: npx cdk deploy PulseNetworking PulseStorage PulsePipeline PulseScheduler PulseApi --require-approval never --outputs-file ../cdk-outputs.json
 
-      - name: Sync frontend to S3
-        run: |
-          BUCKET=$(jq -r '.PulseCdn.FrontendBucketName' cdk-outputs.json)
-          aws s3 sync frontend/dist "s3://$BUCKET" --delete
-
-      - name: Invalidate CloudFront cache
-        run: |
-          DIST_ID=$(aws cloudfront list-distributions \
-            --query "DistributionList.Items[?Comment=='pulse'].Id" \
-            --output text)
-          if [ -n "$DIST_ID" ]; then
-            aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
-          fi
+      # Uncomment when CloudFront restriction lifts on the AWS account:
+      # - name: Sync frontend to S3
+      #   run: |
+      #     BUCKET=$(jq -r '.PulseCdn.FrontendBucketName' cdk-outputs.json)
+      #     aws s3 sync frontend/dist "s3://$BUCKET" --delete
+      # - name: Invalidate CloudFront cache
+      #   run: |
+      #     DIST_ID=$(aws cloudfront list-distributions \
+      #       --query "DistributionList.Items[?Comment=='pulse'].Id" \
+      #       --output text)
+      #     if [ -n "$DIST_ID" ]; then
+      #       aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
+      #     fi
